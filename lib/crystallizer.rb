@@ -3,21 +3,20 @@ require 'ripper'
 module Crystallizer
   class << self
 
-    def ruby2crystal(source, config={})
+    def ruby2crystal(source, **config)
       @globals = []
       {:nullable=>false}.each do |k,v|
         instance_variable_set("@#{k}", config[k] || v)
       end
-      #File.write("./__julialize_debug.log", Ripper.sexp(source).pretty_inspect)
-      transpile(Ripper.sexp(source))
+      transpile(Ripper.sexp(source)).gsub(/\n+/, "\n")
     end
 
     private
       def delim(s)
-        if s.kind_of?(Array) then
-          s.map{|line| "#{line};" }.join
+        if s.kind_of?(Array)
+          s.map{|line| "#{line}\n" }.join
         else
-          "#{s};"
+          "#{s}\n"
         end
       end
 
@@ -25,8 +24,6 @@ module Crystallizer
         if s.instance_of?(String) then
           s
         elsif s.instance_of?(Array) && s[0].instance_of?(Symbol) then
-          #puts "s[0]=#{s[0]}"
-          #puts "s[1]=#{s[1]}"
           case s[0]
           when :program, :bodystmt  #, :else
             s[1].map{|e| delim(transpile(e))}.join
@@ -35,7 +32,10 @@ module Crystallizer
           #  s[2].map{|e| delim(transpile(e))}.join
 
           when :assign
-            delim(transpile(s[1]) + "=" + transpile(s[2]))
+            delim(transpile(s[1]) + " = " + transpile(s[2]))
+
+          when :massign
+            delim(s[1].map{ transpile(_1) }.join(", ") + " = " + transpile(s[2]))
 
           when :var_field, :var_ref
             if [:@gvar, :@ivar, :@cvar].include?(s[1][0])
@@ -48,7 +48,7 @@ module Crystallizer
             end
 
           when :next
-            delim("continue")
+            delim("next")
 
           when :break
             delim("break")
@@ -68,23 +68,23 @@ module Crystallizer
             else
               case s[2]
               when :or
-                operator = "||"
+                operator = "or"
               when :and
-                operator = "&&"
+                operator = "ans"
               when :^
-                operator = "$"
-              when :**
                 operator = "^"
+              when :**
+                operator = "**"
               when :===
-                operator = "==" # Prevent using === since in Julia === checks much strictly than Ruby.
+                operator = "=="
               else
                 operator = s[2].to_s
               end
-              transpile(s[1]) + operator + transpile(s[3])
+              transpile(s[1]) + " " + operator + " " + transpile(s[3])
             end
 
           when :opassign
-            delim(transpile(s[1]) + transpile(s[2]) + transpile(s[3]))
+            delim(transpile(s[1]) + " " + transpile(s[2]) + " " + transpile(s[3]))
 
           when :unary
             case s[1]
@@ -101,13 +101,35 @@ module Crystallizer
           when :paren
             "(" + transpile(s[1][0]) + ")"
 
+          when :arg_paren
+            transpile(s[1])
+
+          when :brace_block
+            "{ |" + s[1] + "| " + s[2] + " }"
+
+          when :do_block
+            s[1]
           when :symbol
-            s[1][1]
+            transpile(s[1])
+
+          when :symbol_literal
+            transpile(s[1])
+
+          when :string_literal
+            s[1][1..].map{ transpile(_1) }.join(" + ")
+
+          when :string_embexpr
+            case s[1][0][0]
+            when :var_ref
+              transpile(s[1][0][1])
+            when :binary
+              "(" + s[1][0][1..].map{ transpile(_1) }.join(" ") + ").to_s"
+            end
 
           when :field, :call
             case s[1][1][1]
             when "Math"
-              transpile(s[3][1])
+              "Math." + transpile(s[3][1])
             when "Random"
               case s[3][1]
               when "rand"
@@ -115,6 +137,13 @@ module Crystallizer
               else
                 transpile(s[3][1])
               end
+            when "gets"
+              if s[3][1] == "chomp"
+                "read_line"
+              else
+                "read_line." + transpile(s[3][1])
+              end
+
             else
               case s[3][1]
               when "dup"
@@ -171,8 +200,11 @@ module Crystallizer
               when "ceil", "floor"
                 "#{s[3][1]}(Int64,#{transpile(s[1])})"
 
-              when "size", "count"
-                "size(#{transpile(s[1])})[1]"
+              when "size"
+                transpile(s[1]) + ".size"
+
+              when "count"
+                transpile(s[1]) + ".count"
 
               when "next", "succ"
                 "(#{transpile(s[1])}+1)"
@@ -190,7 +222,7 @@ module Crystallizer
                 "round(Int64,#{transpile(s[1])})"
 
               else
-                "#{transpile(s[3])}(#{transpile(s[1])})"
+                "#{transpile(s[1])}.#{transpile(s[3])}"
 
               end
             end
@@ -209,7 +241,7 @@ module Crystallizer
             end
 
           when :string_content
-            s[1].nil? ? "" : 'string(' + s[1..-1].map{|e| transpile(e)}.join(",") + ')'
+            s[1].nil? ? "" : s[1..-1].map{|e| transpile(e)}.join(",")
 
           when :@tstring_content
             '"' + s[1] + '"'
@@ -219,24 +251,28 @@ module Crystallizer
 
           when :command
             case s[1][1]
-            when "p", "puts", "printf", "print"
+            when "p", "puts"
+              c = "puts"
+            when "print"
               c = "print"
             else
               c = transpile(s[1])
             end
             delim(c + "(" + transpile(s[2]) + ")")
+            # delim(c + "(" + transpile(s[2][1][0]) + ")")
 
           when :method_add_block
             t = s[1][0]==:call ? s : s[1]
-            if t[1][3][1]=="each"
-              delim([
-                "___state = start(#{t[1][1][1][1]})",
-                "while !done(#{t[1][1][1][1]}, ___state)",
-                "___i, ___state = next(#{t[1][1][1][1]}, ___state)",
-                (s[2][1].nil? ? "" : "#{s[2][1][1][1][0][1]} = ___i"),
-                s[2][2].map{|e| delim(transpile(e))}.join,
-                "end"
-              ])
+            if ["each", "each_with_index"].include?(t[1][3][1])
+              a = [transpile(t[1])]
+              if t[2][0] == :do_block
+                a[-1] += " do |" + t[2][1][1][1].map{ transpile(_1) }.join(", ") + "|"
+              end
+              if t[2][2][0] == :bodystmt
+                a << transpile(t[2][2][1][0])
+              end
+              a << "end"
+              delim(a)
             elsif t[1][3][1]=="downto"
               delim([
                 "for #{transpile(s[2][1])} in countfrom(#{transpile(t[1][1])}, -1)",
@@ -267,9 +303,9 @@ module Crystallizer
                 if s[2][1][1][0][0] == :dot2 || s[2][1][1][0][0] == :dot3
                   range = "#{transpile(s[2])}"
                 elsif s[2][1][1].count == 1
-                  range = "#{transpile(s[2])}+1"
+                  range = "#{transpile(s[2])}"
                 else
-                  range = "#{transpile(s[2][1][1][0])}+1:#{start_index}+#{transpile(s[2][1][1][0])}+#{transpile(s[2][1][1][1])}+1"
+                  range = "#{transpile(s[2][1][1][0])}:#{start_index}+#{transpile(s[2][1][1][0])}+#{transpile(s[2][1][1][1])}"
                 end
                 "#{method}(#{transpile(s[1][1])}, #{range})"
 
@@ -320,15 +356,17 @@ module Crystallizer
               when "atan2"
                 "atan2(#{transpile(s[2])})"
               when "gcd"
-                "gcd(#{transpile(s[1][1])}, #{transpile(s[2])})"
+                "#{transpile(s[1][1])}.gcd(#{transpile(s[2])})"
               when "lcm"
-                "lcm(#{transpile(s[1][1])}, #{transpile(s[2])})"
+                "#{transpile(s[1][1])}.lcm(#{transpile(s[2])})"
               when "gcdlcm"
                 "[gcd(#{transpile(s[1][1])}, #{transpile(s[2])}), lcm(#{transpile(s[1][1])}, #{transpile(s[2])})]"
               when "key?", "has_key?"
                 "haskey(#{transpile(s[1][1])}, #{transpile(s[2])})"
               when "rand"
                 "int(rand() * #{transpile(s[2])})"
+              # when "map"
+              #   "map(#{transpile(s[2])})"
 
               else
                 transpile(s[1]) + "(" + (transpile(s[2]) || "") + ")"
@@ -336,7 +374,17 @@ module Crystallizer
             end
 
           when :args_add_block
-            s[1].map{|e| transpile(e)}.join(",")
+            if s[1].empty?.!
+              case s[1][0][0]
+              when :paren
+              when :string_literal
+                transpile(s[1][0])
+              else
+                s[1].map{|e| transpile(e) }.join(", ")
+              end
+            else
+              "&." + transpile(s[2])
+            end
 
           when :while
             delim([
@@ -353,14 +401,9 @@ module Crystallizer
             ])
 
           when :if, :elsif
-            if s[0]==:elsif then
-              keyword = "elseif"
-            else
-              keyword = "if"
-            end
-            additional_condition = !s[3].nil? ? transpile(s[3]) : "end"
+            additional_condition = s[3].nil?.! ? transpile(s[3]) : "end"
             delim([
-              "#{keyword} " + transpile(s[1]),
+              "#{s[0].to_s} " + transpile(s[1]),
               s[2].map{|e| delim(transpile(e))}.join,
               "#{additional_condition}"
             ])
@@ -392,8 +435,11 @@ module Crystallizer
           when :params
             s[1].nil? ? "" : s[1].map{|e| e[1]}.join(", ")
 
-          when :dot2, :dot3
-            "#{transpile(s[1])}:#{transpile(s[2])}"
+          when :dot2
+            "#{transpile(s[1])}..#{transpile(s[2])}"
+
+          when :dot3
+            "#{transpile(s[1])}...#{transpile(s[2])}"
 
           when :aref, :aref_field
             aref_string = ->(type, list, index){
@@ -401,12 +447,12 @@ module Crystallizer
               type==:aref && @nullable ? "get(#{list}, #{index}, Nullable)" : list + "[#{index}]"
             }
             if !s[2].flatten.include?(:dot2) && !s[2].flatten.include?(:dot3) && s[2][1][0][0]!=:string_literal then
-              aref_string.call(s[0], transpile(s[1]), transpile(s[2])+"+1")
+              aref_string.call(s[0], transpile(s[1]), transpile(s[2]))
             else
               if s[2].flatten.include?(:dot2)
-                transpile(s[1]) + "[#{transpile(s[2][1][0][1])}+1:#{transpile(s[2][1][0][2])}+1]"
+                transpile(s[1]) + "[#{transpile(s[2][1][0][1])}..#{transpile(s[2][1][0][2])}]"
               elsif s[2].flatten.include?(:dot3)
-                transpile(s[1]) + "[#{transpile(s[2][1][0][1])}+1:#{transpile(s[2][1][0][2])}]"
+                transpile(s[1]) + "[#{transpile(s[2][1][0][1])}...#{transpile(s[2][1][0][2])}]"
               else
                 aref_string.call(s[0], transpile(s[1]), transpile(s[2]))
               end
@@ -435,13 +481,18 @@ module Crystallizer
           when :return
             delim("return #{transpile(s[1])}")
 
+          when :mrhs_new_from_args
+            delim(s[1..].map{ transpile(_1) }.join(", "))
+
           else
             transpile(s[1])
 
           end
 
-        elsif s.instance_of?(Array) && s[0].instance_of?(Array) then
+        elsif s.instance_of?(Array) && s[0].instance_of?(Array)
           s.map{|e| transpile(e)}.join
+        elsif s.instance_of?(Symbol) && s[0].instance_of?(String)
+          s[0]
         end
       end
   end
