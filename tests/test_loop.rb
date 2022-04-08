@@ -31,6 +31,28 @@ class TestLoop < Minitest::Test
     end
     EOF
 
-    assert_equal Crystallizer.ruby2crystal(code), "(0..n).each_with_index do |x, i|\nputs(x + i)\nend\n"
+    assert_equal Crystallizer.ruby2crystal(code), "n.times do |i|\nputs(i)\nend\n"
+  end
+
+  def test_upto
+    code =<<-EOF
+    0.upto(n) do |i|
+      puts i
+    end
+    EOF
+
+    assert_equal Crystallizer.ruby2crystal(code), "0.upto(n) do |i|\nputs(i)\nend\n"
+  end
+
+  def test_while
+    code =<<-EOF
+    x = 0
+    while x < n
+      puts x
+      x += 1
+    end
+    EOF
+
+    assert_equal Crystallizer.ruby2crystal(code), "x = 0\nwhile x < n\nputs(x)\nx += 1\nend\n"
   end
 end
