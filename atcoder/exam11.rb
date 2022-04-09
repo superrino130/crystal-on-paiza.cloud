@@ -1,9 +1,16 @@
-# https://atcoder.jp/contests/abs/tasks/abc081_b
+# https://atcoder.jp/contests/abs/tasks/arc089_a
 n = gets.to_i
-a = gets.split.map(&:to_i)
-ans = 0
-while a.all?{ |e| e % 2 == 0 }
-  a.map!{ |e| e / 2 }
-  ans += 1
+txys = Array.new(n){ gets.split.map(&:to_i) }
+t0 = x0 = y0 = 0
+txys.each do |txy|
+  kd = (txy[1] - x0).abs + (txy[2] - y0).abs
+  td = (txy[0] - t0).abs
+  if kd > td || kd % 2 != td % 2
+      puts "No"
+      exit
+  end
+  t0 = txy[0]
+  x0 = txy[1]
+  y0 = txy[2]
 end
-puts ans
+puts "Yes"

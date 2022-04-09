@@ -2,22 +2,9 @@ require_relative 'lib/crystallizer'
 require 'ripper'
 
 code =<<EOF
-n = gets.to_i
-a = gets.split.map(&:to_i)
-cnt = 0
-max = 0
-(0...n).each do |i|
-  min = 10**9
-  j = i
-  while j < n
-    min = a[j] if min > a[j]
-    max = min * (j - i + 1) if max < min * (j - i + 1)
-    j += 1
-  end
-  cnt = max if cnt < max
-end
-puts cnt
+eval'N,K,X,*A='+`dd`.split*?,
+p A.map{_1-X*(K-K-=[K,_1/X].min)}.sort[..~K].sum
 EOF
 
-# pp Ripper.sexp(code)
-puts Crystallizer::ruby2crystal(code)
+pp Ripper.sexp(code)
+# puts Crystallizer::ruby2crystal(code)

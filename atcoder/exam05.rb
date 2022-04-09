@@ -1,15 +1,16 @@
-# https://atcoder.jp/contests/abs/tasks/abc083_b
-n, a, b = gets.split.map(&:to_i)
+# https://atcoder.jp/contests/abs/tasks/abc087_b
+a = gets.to_i
+b = gets.to_i
+c = gets.to_i
+x = gets.to_i
 ans = 0
-(1..n).each do |x|
-  y = x
-  t = 0
-  while x > 0
-    t += x % 10
-    x /= 10
-  end
-  if a <= t && t <= b
-    ans += y
+(0..a).each do |aa|
+  (0..b).each do |bb|
+    (0..c).each do |cc|
+      if aa * 500 + bb * 100 + cc * 50 == x
+        ans += 1
+      end
+    end
   end
 end
 puts ans
