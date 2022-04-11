@@ -10,7 +10,7 @@ module Crystallizer
     private
       def transpile(s)
         arr = []
-        s.map do |w|
+        s.each_with_index do |w, i|
           arr << case w[2]
           when "gets", "readline"
             "read_line"
@@ -18,30 +18,26 @@ module Crystallizer
             "//="
           when "/"
             "//"
-          when "Array"
-            if s.to_s.include?("to_i")
-              if s.to_s.include?("split")
-                "Array(Array(Int32))"
-              else
-                "Array(Int32)"
-              end
-            elsif s.to_s.include?("to_f")
-              if s.to_s.include?("split")
-                "Array(Array(Float64)"
-              else
-                "Array(Float64)"
-              end
+          when "<<"
+            arr.pop if arr[-1] == " "
+            ".push"
+          when "next"
+            if arr[-1] == "."
+              arr.pop
+              "+1"
             else
-              "Array()"
+              "next"
             end
           when "Regexp"
             "Regex"
+          when "include?"
+            "includes?"
           else
             w[2]
           end
         end
         arr.join('')
-          .gsub(".chomp", "")
+          .gsub("read_line.chomp", "read_line")
           .gsub("&:", "&.")
       end
   end
