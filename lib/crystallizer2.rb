@@ -10,6 +10,7 @@ module Crystallizer
     private
       def transpile(s)
         arr = []
+        f_not_nil = false
         s.each_with_index do |w, i|
           arr << case w[2]
           when "gets", "readline"
@@ -48,10 +49,20 @@ module Crystallizer
             "starts_with?"
           when "end_with?"
             "ends_with?"
+          when "bsearch", "bsearch_index"
+            f_not_nil = true
+            w[2]
           when "/="
             "//="
           when "/"
             "//"
+          when "}"
+            if f_not_nil
+              f_not_nil = false
+              "}.not_nil!"
+            else
+              w[2]
+            end
           when "<<"
             arr.pop if arr[-1] == " "
             ".push"
@@ -60,7 +71,7 @@ module Crystallizer
               arr.pop
               "+1"
             else
-              "next"
+              w[2]
             end
           when "Regexp"
             "Regex"
