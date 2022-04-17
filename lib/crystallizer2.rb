@@ -10,7 +10,7 @@ module Crystallizer
     private
       def transpile(s)
         arr = []
-        bsearch_not_nil = index_not_nil = false
+        bsearch_not_nil = index_not_nil = percom = false
         s.each_with_index do |w, i|
           arr << case w[2]
           when "gets", "readline"
@@ -43,6 +43,8 @@ module Crystallizer
             "has_key?"
           when "value?"
             "has_value?"
+          when "include?"
+            "includes?"
           when "update"
             "merge!"
           when "start_with?"
@@ -54,8 +56,10 @@ module Crystallizer
           when "combination"
             "each_combination"
           when "repeated_permutation"
+            percom = true
             "each_permutation"
           when "repeated_combination"
+            percom = true
             "each_combination"
           when "index"
             index_not_nil = true
@@ -80,6 +84,9 @@ module Crystallizer
             if index_not_nil
               index_not_nil = false
               ").not_nil!"
+            elsif percom
+              percom = false
+              ", reuse=true)"
             else
               w[2]
             end
@@ -89,17 +96,17 @@ module Crystallizer
             else
               w[2]
             end
+          when "||"
+            ds = ".not_nil!"
+            if arr[-1].include?(ds)
+              arr[-1].sub!(ds, "")
+            elsif arr[-2].include?(ds)
+              arr[-2].sub!(ds, "")
+            end
+            w[2]
           # when "<<"
           #   arr.pop if arr[-1] == " "
           #   ".push"
-          when "combinations"
-            "combinations"
-          when "permutations"
-            "permutations"
-          when "repeated_combinations"
-            "repeated_combinations"
-          when "repeated_permutations"
-            "repeated_permutations"
           when "next"
             if arr[-1] == "."
               arr.pop
@@ -114,10 +121,10 @@ module Crystallizer
             else
               w[2]
             end
+          when "Hash"
+            "Hash(Int32, Int32)"
           when "Regexp"
             "Regex"
-          when "include?"
-            "includes?"
           else
             w[2]
           end
