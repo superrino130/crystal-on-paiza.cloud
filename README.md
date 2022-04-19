@@ -3,7 +3,12 @@
 2) `Ruby` を `Crystal` にトランスパイル
 # paize.cloud を利用した開発環境の構築
 not started
+
 # `Ruby` を `Crystal` にトランスパイル
+transpile from Ruby to crystal for Atcoder's Programming Contest
+
+Ruby 2.7.1 to crystal 0.33.0
+
 ## Crystallizer
 use `Ripper#sexp`
 
@@ -47,7 +52,7 @@ s = read_line
 puts "#{a+b+c} #{s}"
 ```
 # Transpile table
-|Ruby|crystal||
+|Ruby|crystal|note|
 |:--|:--|:--|
 |gets, readline|read_line||
 |collect|map||
@@ -85,3 +90,39 @@ puts "#{a+b+c} #{s}"
 |gets.chomp|read_line||
 |&:|&.||
 
+# Solved problem
+https://atcoder.jp/contests/abs/tasks/practice_1
+
+https://atcoder.jp/contests/abs/tasks/abc086_a
+
+https://atcoder.jp/contests/abs/tasks/abc081_a
+
+https://atcoder.jp/contests/abs/tasks/abc081_b
+
+https://atcoder.jp/contests/abs/tasks/abc087_b
+
+https://atcoder.jp/contests/abs/tasks/abc083_b
+
+https://atcoder.jp/contests/abs/tasks/abc088_b
+
+https://atcoder.jp/contests/abs/tasks/abc085_b
+
+https://atcoder.jp/contests/abs/tasks/abc085_c
+
+https://atcoder.jp/contests/abs/tasks/arc065_a
+
+https://atcoder.jp/contests/abs/tasks/arc089_a
+
+https://atcoder.jp/contests/typical90/tasks/typical90_a
+
+https://atcoder.jp/contests/typical90/tasks/typical90_b
+
+https://atcoder.jp/contests/typical90/tasks/typical90_c
+
+https://atcoder.jp/contests/typical90/tasks/typical90_d
+
+https://atcoder.jp/contests/typical90/tasks/typical90_f # Manually change type
+
+https://atcoder.jp/contests/typical90/tasks/typical90_g
+
+https://atcoder.jp/contests/typical90/tasks/typical90_h

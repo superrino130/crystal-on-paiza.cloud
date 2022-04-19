@@ -86,7 +86,7 @@ module Crystallizer
               ").not_nil!"
             elsif percom
               percom = false
-              ", reuse=true)"
+              ", true)"
             else
               w[2]
             end
