@@ -19,7 +19,7 @@ while que.empty?.!
     end
   end
 end
-que << f.index(f.sort[-1])
+que << f.index(f.max)
 f = Array.new(n + 1, 0)
 f[que[0]] = 1
 while que.empty?.!
@@ -31,4 +31,4 @@ while que.empty?.!
     end
   end
 end
-puts f.sort[-1]
+puts f.max

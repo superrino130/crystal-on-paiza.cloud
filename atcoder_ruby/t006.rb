@@ -18,8 +18,8 @@ ans = []
 memo = 0
 while k > 0
   alphs.each do |a|
+    next if s_idx[a][-1] < memo
     j = s_idx[a].bsearch_index{ |b| b >= memo }
-    next if j.nil?
     if k + s_idx[a][j] <= n
       memo = s_idx[a][j] + 1
       ans << a

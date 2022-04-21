@@ -1,13 +1,15 @@
 # crystal-on-paiza.cloud
-1) paize.cloud を利用した開発環境の構築
-2) `Ruby` を `Crystal` にトランスパイル
-# paize.cloud を利用した開発環境の構築
+This repository has two goals
+1) Building a development environment using paize.cloud
+2) transpile from Ruby to crystal for Atcoder's Programming Contest
+# Building a development environment using paize.cloud
+`paize.cloud` を利用した開発環境の構築
+
 not started
+# transpile from Ruby to crystal for Atcoder's Programming Contest
+`Ruby` を `Crystal` にトランスパイル
 
-# `Ruby` を `Crystal` にトランスパイル
-transpile from Ruby to crystal for Atcoder's Programming Contest
-
-Ruby 2.7.1 to crystal 0.33.0
+Ruby 2.7.1 -> crystal 0.33.0
 
 ## Crystallizer
 use `Ripper#sexp`
@@ -37,7 +39,7 @@ writer2.rb
 require_relative 'lib/crystallizer2'
 require 'ripper'
 
-filename = "atcoder_ruby/exam01.rb"
+filename = "atcoder_ruby/abs00.rb"
 
 code = File.open(filename){ _1.read }
 transcode = Crystallizer::ruby2crystal(code)
@@ -89,6 +91,18 @@ puts "#{a+b+c} #{s}"
 |Regexp|Regex||
 |gets.chomp|read_line||
 |&:|&.||
+# Comparison of execution times(ms)
+Typical competition professional 90 questions(競プロ典型 90 問)
+|Problem No.|Ruby|crystal|note|
+|:--:|--:|--:|:--|
+|001|301|36|
+|002|558|93|
+|003|249|671|Array#push and Array#shift is slow|
+|004|2010|519|
+|005|||not solved|
+|006|961|98|
+|007|653|156|
+|008|171|25|Char is faster than String|
 
 # Solved problem
 https://atcoder.jp/contests/abs/tasks/practice_1
@@ -121,7 +135,7 @@ https://atcoder.jp/contests/typical90/tasks/typical90_c
 
 https://atcoder.jp/contests/typical90/tasks/typical90_d
 
-https://atcoder.jp/contests/typical90/tasks/typical90_f # Manually change type
+https://atcoder.jp/contests/typical90/tasks/typical90_f # Manually change the type
 
 https://atcoder.jp/contests/typical90/tasks/typical90_g
 
