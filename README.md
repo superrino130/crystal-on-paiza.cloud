@@ -103,6 +103,7 @@ Typical competition professional 90 questions(競プロ典型 90 問)
 |006|961|98|
 |007|653|156|
 |008|171|25|Char is faster than String|
+|010|269|107|
 |014|149|50|
 
 # Solved problem
@@ -142,4 +143,6 @@ https://atcoder.jp/contests/typical90/tasks/typical90_g
 
 https://atcoder.jp/contests/typical90/tasks/typical90_h
 
-https://atcoder.jp/contests/typical90/tasks/typical90_n # Manually change the type(0 ->0i64)
+https://atcoder.jp/contests/typical90/tasks/typical90_j
+
+https://atcoder.jp/contests/typical90/tasks/typical90_n # Manually change the type (0 -> 0i64)
