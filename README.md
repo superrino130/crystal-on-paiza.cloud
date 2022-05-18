@@ -88,6 +88,7 @@ puts "#{a+b+c} #{s}"
 |.next|+1|fixed|
 |.pred|-1|fixed|
 |Hash|Hash(Int32, Int32)|fixed|
+|Set|Set(Int32)|fixed|
 |Regexp|Regex||
 |gets.chomp|read_line||
 |&:|&.||

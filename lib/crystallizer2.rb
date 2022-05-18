@@ -104,9 +104,6 @@ module Crystallizer
               arr[-2].sub!(ds, "")
             end
             w[2]
-          # when "<<"
-          #   arr.pop if arr[-1] == " "
-          #   ".push"
           when "next"
             if arr[-1] == "."
               arr.pop
@@ -123,6 +120,8 @@ module Crystallizer
             end
           when "Hash"
             "Hash(Int32, Int32)"
+          when "Set"
+            "Set(Int32)"
           when "Regexp"
             "Regex"
           else
