@@ -83,6 +83,8 @@ puts "#{a+b+c} #{s}"
 |bsearch|bsearch{}.not_nil!||
 |/=|//=||
 |/|//||
+|ceil|ceil.to_i||
+|floor|floor.to_i||
 |{}|{} of Int32 => Int32|fixed|
 |[]|[] of Int32|fixed|
 |~~.next~~|~~+1~~|~~fixed~~|
