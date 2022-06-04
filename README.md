@@ -85,8 +85,8 @@ puts "#{a+b+c} #{s}"
 |/|//||
 |{}|{} of Int32 => Int32|fixed|
 |[]|[] of Int32|fixed|
-|.next|+1|fixed|
-|.pred|-1|fixed|
+|~~.next~~|~~+1~~|~~fixed~~|
+|~~.pred~~|~~-1~~|~~fixed~~|
 |Hash|Hash(Int32, Int32)|fixed|
 |Set|Set(Int32)|fixed|
 |Regexp|Regex||

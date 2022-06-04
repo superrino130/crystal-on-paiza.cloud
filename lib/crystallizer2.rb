@@ -104,20 +104,20 @@ module Crystallizer
               arr[-2].sub!(ds, "")
             end
             w[2]
-          when "next"
-            if arr[-1] == "."
-              arr.pop
-              "+1"
-            else
-              w[2]
-            end
-          when "pred"
-            if arr[-1] == "."
-              arr.pop
-              "-1"
-            else
-              w[2]
-            end
+          # when "next"
+          #   if arr[-1] == "."
+          #     arr.pop
+          #     "+1"
+          #   else
+          #     w[2]
+          #   end
+          # when "pred"
+          #   if arr[-1] == "."
+          #     arr.pop
+          #     "-1"
+          #   else
+          #     w[2]
+          #   end
           when "Hash"
             "Hash(Int32, Int32)"
           when "Set"
