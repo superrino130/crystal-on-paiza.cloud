@@ -89,6 +89,7 @@ puts "#{a+b+c} #{s}"
 |[]|[] of Int32|fixed|
 |~~.next~~|~~+1~~|~~fixed~~|
 |~~.pred~~|~~-1~~|~~fixed~~|
+|Float|Float64|fixed (ex. Float64::INFINITY)|
 |Hash|Hash(Int32, Int32)|fixed|
 |Set|Set(Int32)|fixed|
 |Regexp|Regex||

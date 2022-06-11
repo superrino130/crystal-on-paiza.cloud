@@ -122,6 +122,8 @@ module Crystallizer
           #   else
           #     w[2]
           #   end
+          when "Float"
+            "Float64"
           when "Hash"
             "Hash(Int32, Int32)"
           when "Set"
