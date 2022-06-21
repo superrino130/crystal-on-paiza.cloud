@@ -77,8 +77,8 @@ puts "#{a+b+c} #{s}"
 |end_with?|ends_with?||
 |permutation|each_permutation||
 |combination|each_combination||
-|repeated_permutation|each_permutation(,reuse=true)||
-|repeated_combination|each_combination(,reuse=true)||
+|repeated_permutation|each_repeated_permutation(,reuse=true)||
+|repeated_combination|each_repeated_combination(,reuse=true)||
 |index|index().not_nil!||
 |bsearch|bsearch{}.not_nil!||
 |/=|//=||

@@ -57,10 +57,10 @@ module Crystallizer
             "each_combination"
           when "repeated_permutation"
             percom = true
-            "each_permutation"
+            "each_repeated_permutation"
           when "repeated_combination"
             percom = true
-            "each_combination"
+            "each_repeated_combination"
           when "index"
             index_not_nil = true
             w[2]
