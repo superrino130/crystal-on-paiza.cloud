@@ -10,7 +10,8 @@ module Crystallizer
     private
       def transpile(s)
         arr = []
-        bsearch_not_nil = index_not_nil = percom = false
+        bsearch_not_nil = index_not_nil = percom = marshalflg = false
+        marshalcnt = 0
         s.each_with_index do |w, i|
           arr << case w[2]
           when "gets", "readline"
@@ -91,6 +92,16 @@ module Crystallizer
             elsif percom
               percom = false
               ", true)"
+            elsif marshalcnt == 2
+              marshalcnt -= 1
+              ".clone"
+            elsif marshalcnt > 2
+              marshalcnt -= 1
+              ""
+            elsif marshalcnt == 1
+              marshalcnt = 0
+              marshalflg = false
+              ""
             else
               w[2]
             end
@@ -130,8 +141,22 @@ module Crystallizer
             "Set(Int32)"
           when "Regexp"
             "Regex"
+          when "Marshal"
+            marshalflg = true
+            ""
           else
-            w[2]
+            if marshalflg
+              marshalcnt += 1 if w[2] == "("
+              if marshalcnt == 2 && w[2] == "("
+                ""
+              elsif marshalcnt >= 2
+                w[2]
+              else
+                ""
+              end
+            else
+              w[2]
+            end
           end
         end
         arr.join('')
