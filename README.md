@@ -93,6 +93,7 @@ puts "#{a+b+c} #{s}"
 |Hash|Hash(Int32, Int32)|fixed|
 |Set|Set(Int32)|fixed|
 |Regexp|Regex||
+|$stdout|STDOUT||
 |gets.chomp|read_line||
 |&:|&.||
 # Comparison of execution times(ms)

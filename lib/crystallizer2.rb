@@ -144,6 +144,8 @@ module Crystallizer
           when "Marshal"
             marshalflg = true
             ""
+          when "$stdout"
+            "STDOUT"
           else
             if marshalflg
               marshalcnt += 1 if w[2] == "("
